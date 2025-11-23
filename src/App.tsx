@@ -29,6 +29,7 @@ export const App: React.FC = () => {
   const [filter, setFilter] = useState<Filter>(Filter.All);
   const [busyIds, setBusyIds] = useState<Record<string, boolean>>({});
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
+  const [focusTrigger, setFocusTrigger] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -111,8 +112,9 @@ export const App: React.FC = () => {
     }
 
     setError(null);
+
     const temp: Todo = {
-      id: Date.now(),
+      id: 0,
       title: trimmed,
       completed: false,
       userId: USER_ID,
@@ -126,11 +128,14 @@ export const App: React.FC = () => {
         userId: USER_ID,
       });
 
-      setTodos(prev => [created, ...prev]);
+      setTodos(prev => [...prev, created]);
+
+      setTempTodo(null);
 
       return true;
     } catch (e) {
       setError(TodoError.Add);
+      setTempTodo(null);
 
       return false;
     } finally {
@@ -144,6 +149,7 @@ export const App: React.FC = () => {
     try {
       await client.delete(`/todos/${id}`);
       setTodos(prev => prev.filter(t => t.id !== id));
+      setFocusTrigger(n => n + 1);
     } catch (event) {
       setError(TodoError.Delete);
     } finally {
@@ -230,6 +236,8 @@ export const App: React.FC = () => {
       .filter(x => x.result.status === 'rejected')
       .map(x => x.id);
 
+    setFocusTrigger(n => n + 1);
+
     setTodos(prev =>
       prev.filter(t => !ids.includes(t.id) || failed.includes(t.id)),
     );
@@ -267,9 +275,8 @@ export const App: React.FC = () => {
           onToggleAll={handleToggleAll}
           adding={!!tempTodo}
           onAdd={handleAdd}
+          focusTrigger={focusTrigger}
         />
-
-        {tempTodo && <TodoItem todo={tempTodo} loading={true} />}
 
         <TodoList
           todos={visibleTodos}
@@ -279,6 +286,7 @@ export const App: React.FC = () => {
           onDelete={handleDelete}
         />
 
+        {tempTodo && <TodoItem todo={tempTodo} loading={true} />}
         {todos.length > 0 && (
           <Footer
             activeCount={activeCount}

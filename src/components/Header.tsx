@@ -3,13 +3,28 @@ import { useEffect, useRef, useState } from 'react';
 const NewTodoForm: React.FC<{
   onAdd: (title: string) => Promise<boolean>;
   disabled?: boolean;
-}> = ({ onAdd, disabled = false }) => {
+  focusTrigger?: number;
+}> = ({ onAdd, disabled = false, focusTrigger }) => {
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    inputRef.current?.focus(); // фокус за замовчуванням
-  }, []);
+    if (!disabled) {
+      inputRef.current?.focus();
+    }
+  }, [disabled]);
+
+  useEffect(() => {
+    if (!disabled) {
+      setTimeout(() => {
+        if (!inputRef.current || inputRef.current.disabled) {
+          return;
+        }
+
+        inputRef.current.focus();
+      }, 0);
+    }
+  }, [focusTrigger, disabled]);
 
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -19,7 +34,13 @@ const NewTodoForm: React.FC<{
       setValue('');
     }
 
-    inputRef.current?.focus();
+    setTimeout(() => {
+      if (!inputRef.current || inputRef.current.disabled) {
+        return;
+      }
+
+      inputRef.current.focus();
+    }, 0);
   };
 
   return (
@@ -43,7 +64,8 @@ export const Header: React.FC<{
   onToggleAll: () => Promise<void>;
   onAdd: (title: string) => Promise<boolean>;
   adding: boolean;
-}> = ({ toggleAllActive, onToggleAll, onAdd, adding }) => {
+  focusTrigger?: number;
+}> = ({ toggleAllActive, onToggleAll, onAdd, adding, focusTrigger }) => {
   return (
     <header className="todoapp__header">
       <button
@@ -53,7 +75,11 @@ export const Header: React.FC<{
         onClick={() => void onToggleAll()}
       />
 
-      <NewTodoForm onAdd={onAdd} disabled={adding} />
+      <NewTodoForm
+        onAdd={onAdd}
+        disabled={adding}
+        focusTrigger={focusTrigger}
+      />
     </header>
   );
 };
