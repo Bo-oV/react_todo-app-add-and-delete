@@ -111,9 +111,14 @@ export const App: React.FC = () => {
     }
 
     setError(null);
+    const temp: Todo = {
+      id: Date.now(),
+      title: trimmed,
+      completed: false,
+      userId: USER_ID,
+    };
 
-    setTempTodo({ id: 0, title: trimmed, completed: false, userId: USER_ID });
-
+    setTempTodo(temp);
     try {
       const created = await client.post<Todo>('/todos', {
         title: trimmed,
@@ -129,7 +134,7 @@ export const App: React.FC = () => {
 
       return false;
     } finally {
-      setTempTodo(null);
+      setTimeout(() => setTempTodo(null), 200);
     }
   }, []);
 
@@ -195,7 +200,7 @@ export const App: React.FC = () => {
         ),
       );
     } catch (e) {
-      setError('Unable to toggle all todos');
+      setError(TodoError.Add);
     }
   }, [todos]);
 
@@ -230,7 +235,7 @@ export const App: React.FC = () => {
     );
 
     if (failed.length > 0) {
-      setError('Unable to delete a todo');
+      setError(TodoError.Delete);
     }
 
     setBusyIds(prev => {
@@ -264,7 +269,7 @@ export const App: React.FC = () => {
           onAdd={handleAdd}
         />
 
-        {tempTodo && <TodoItem todo={tempTodo} loading />}
+        {tempTodo && <TodoItem todo={tempTodo} loading={true} />}
 
         <TodoList
           todos={visibleTodos}

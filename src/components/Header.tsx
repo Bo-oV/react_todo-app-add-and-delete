@@ -43,7 +43,7 @@ export const Header: React.FC<{
   onToggleAll: () => Promise<void>;
   onAdd: (title: string) => Promise<boolean>;
   adding: boolean;
-}> = ({ toggleAllActive, onToggleAll, onAdd, adding  }) => {
+}> = ({ toggleAllActive, onToggleAll, onAdd, adding }) => {
   return (
     <header className="todoapp__header">
       <button
